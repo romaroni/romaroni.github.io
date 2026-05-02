@@ -1,108 +1,136 @@
+
+<!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Winnin Education — Level 00 Assessment</title>
 <style>
-  *{box-sizing:border-box;margin:0;padding:0}
-  body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f9f9f8;color:#1a1a1a;min-height:100vh;display:flex;align-items:flex-start;justify-content:center;padding:2rem 1rem}
-  .wrap{width:100%;max-width:620px}
-  h1{font-size:22px;font-weight:500;margin-bottom:4px}
-  .sub{font-size:14px;color:#888;margin-bottom:2rem}
-  .card{background:#fff;border:1px solid #e8e8e4;border-radius:12px;padding:1.5rem;margin-bottom:1rem}
-  .metrics{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:1.25rem}
-  .metric{background:#f5f5f2;border-radius:8px;padding:12px;text-align:center}
-  .metric-label{font-size:12px;color:#888;margin-bottom:3px}
-  .metric-val{font-size:20px;font-weight:500}
-  .hint{font-size:13px;color:#888;line-height:1.5}
-  label{display:block;font-size:13px;color:#666;margin-bottom:6px}
-  input[type=text]{width:100%;padding:10px 14px;font-size:15px;border:1px solid #d0d0cc;border-radius:8px;background:#fff;color:#1a1a1a;outline:none}
-  input[type=text]:focus{border-color:#6366f1}
-  .btn{display:inline-block;padding:10px 20px;font-size:14px;border-radius:8px;border:1px solid #d0d0cc;background:#fff;color:#1a1a1a;cursor:pointer;transition:all 0.12s}
-  .btn:hover{background:#f5f5f2}
-  .btn:disabled{opacity:0.4;cursor:not-allowed}
-  .btn-primary{background:#6366f1;color:#fff;border-color:#6366f1}
-  .btn-primary:hover{opacity:0.88}
-  .btn-full{width:100%;padding:12px}
-  .progress-bar{height:4px;background:#e8e8e4;border-radius:2px;overflow:hidden;margin-bottom:1.5rem}
-  .progress-fill{height:100%;background:#6366f1;border-radius:2px;transition:width 0.3s}
-  .section-pill{display:inline-block;padding:3px 10px;border-radius:20px;font-size:12px;font-weight:500;margin-bottom:0.75rem}
-  .s1{background:#ede9fe;color:#5b21b6}
-  .s2{background:#fef3c7;color:#92400e}
-  .s3{background:#dcfce7;color:#166534}
-  .q-text{font-size:15px;font-weight:500;line-height:1.5;margin-bottom:1.25rem}
-  .opt{display:block;width:100%;text-align:left;padding:12px 16px;margin:6px 0;background:#fff;border:1px solid #e8e8e4;border-radius:8px;cursor:pointer;font-size:14px;color:#1a1a1a;transition:all 0.12s}
-  .opt:hover{border-color:#c0bfff;background:#f5f5fe}
-  .opt.selected{border-color:#6366f1;background:#ede9fe;color:#4338ca}
-  .opt.correct{border-color:#16a34a;background:#dcfce7;color:#166534}
-  .opt.wrong{border-color:#dc2626;background:#fee2e2;color:#991b1b}
-  .nav{display:flex;justify-content:space-between;align-items:center;margin-top:1.25rem}
-  .score-big{font-size:36px;font-weight:500;text-align:center;margin:0.5rem 0}
-  .score-sub{font-size:14px;color:#888;text-align:center;margin-bottom:1.5rem}
-  .pass-pill{display:inline-block;padding:4px 14px;border-radius:20px;font-size:14px;font-weight:500}
-  .pass{background:#dcfce7;color:#166534}
-  .fail{background:#fee2e2;color:#991b1b}
-  .breakdown{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:1rem}
-  .cert{border:1px solid #e8e8e4;border-radius:12px;padding:2rem;text-align:center;margin-top:1rem}
-  .cert-pre{font-size:10px;letter-spacing:2px;color:#888;text-transform:uppercase;margin-bottom:1rem}
-  .cert-name{font-size:22px;font-weight:500;margin:8px 0}
-  .cert-course{font-size:15px;font-weight:500;margin:4px 0}
-  .cert-score{font-size:13px;color:#888;margin-bottom:1.5rem}
-  .cert-footer{border-top:1px solid #e8e8e4;padding-top:1rem;display:flex;justify-content:space-between;font-size:11px;color:#aaa}
-  .log-status{font-size:12px;margin-top:8px;text-align:center}
-  .log-ok{color:#16a34a}
-  .log-err{color:#dc2626}
-  .log-pending{color:#888}
-  .retake-hint{font-size:13px;color:#888;text-align:center;margin-top:0.75rem;line-height:1.5}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f9f9f8;color:#1a1a1a;min-height:100vh;display:flex;align-items:flex-start;justify-content:center;padding:2rem 1rem}
+.wrap{width:100%;max-width:620px}
+h1{font-size:22px;font-weight:500;margin-bottom:4px}
+.sub{font-size:14px;color:#888;margin-bottom:2rem}
+.card{background:#fff;border:1px solid #e8e8e4;border-radius:12px;padding:1.5rem;margin-bottom:1rem}
+.metrics{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:1.25rem}
+.metric{background:#f5f5f2;border-radius:8px;padding:12px;text-align:center}
+.metric-label{font-size:12px;color:#888;margin-bottom:3px}
+.metric-val{font-size:20px;font-weight:500}
+.hint{font-size:13px;color:#888;line-height:1.5}
+label{display:block;font-size:13px;color:#666;margin-bottom:6px}
+input[type=text]{width:100%;padding:10px 14px;font-size:15px;border:1px solid #d0d0cc;border-radius:8px;background:#fff;color:#1a1a1a;outline:none}
+input[type=text]:focus{border-color:#6366f1}
+.btn{display:inline-block;padding:10px 20px;font-size:14px;border-radius:8px;border:1px solid #d0d0cc;background:#fff;color:#1a1a1a;cursor:pointer;transition:all 0.12s}
+.btn:hover{background:#f5f5f2}.btn:disabled{opacity:0.4;cursor:not-allowed}
+.btn-primary{background:#6366f1;color:#fff;border-color:#6366f1}.btn-primary:hover{opacity:0.88}
+.btn-full{width:100%;padding:12px}
+.progress-bar{height:4px;background:#e8e8e4;border-radius:2px;overflow:hidden;margin-bottom:1.5rem}
+.progress-fill{height:100%;background:#6366f1;border-radius:2px;transition:width 0.3s}
+.section-pill{display:inline-block;padding:3px 10px;border-radius:20px;font-size:12px;font-weight:500;margin-bottom:0.75rem}
+.s1{background:#ede9fe;color:#5b21b6}.s2{background:#fef3c7;color:#92400e}.s3{background:#dcfce7;color:#166534}
+.q-text{font-size:15px;font-weight:500;line-height:1.5;margin-bottom:1.25rem}
+.opt{display:block;width:100%;text-align:left;padding:12px 16px;margin:6px 0;background:#fff;border:1px solid #e8e8e4;border-radius:8px;cursor:pointer;font-size:14px;color:#1a1a1a;transition:all 0.12s}
+.opt:hover{border-color:#c0bfff;background:#f5f5fe}
+.opt.selected{border-color:#6366f1;background:#ede9fe;color:#4338ca}
+.opt.correct{border-color:#16a34a;background:#dcfce7;color:#166534}
+.opt.wrong{border-color:#dc2626;background:#fee2e2;color:#991b1b}
+.nav{display:flex;justify-content:space-between;align-items:center;margin-top:1.25rem}
+.score-big{font-size:36px;font-weight:500;text-align:center;margin:0.5rem 0}
+.score-sub{font-size:14px;color:#888;text-align:center;margin-bottom:1.5rem}
+.pass-pill{display:inline-block;padding:4px 14px;border-radius:20px;font-size:14px;font-weight:500}
+.pass{background:#dcfce7;color:#166534}.fail{background:#fee2e2;color:#991b1b}
+.breakdown{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:1rem}
+.cert{border:1px solid #e8e8e4;border-radius:12px;padding:2rem;text-align:center;margin-top:1rem}
+.cert-pre{font-size:10px;letter-spacing:2px;color:#888;text-transform:uppercase;margin-bottom:1rem}
+.cert-name{font-size:22px;font-weight:500;margin:8px 0}
+.cert-course{font-size:15px;font-weight:500;margin:4px 0}
+.cert-score{font-size:13px;color:#888;margin-bottom:1.5rem}
+.cert-footer{border-top:1px solid #e8e8e4;padding-top:1rem;display:flex;justify-content:space-between;font-size:11px;color:#aaa}
+.log-status{font-size:12px;margin-top:8px;text-align:center}
+.log-ok{color:#16a34a}.log-err{color:#dc2626}.log-pending{color:#888}
+.retake-hint{font-size:13px;color:#888;text-align:center;margin-top:0.75rem;line-height:1.5}
 </style>
 </head>
 <body>
-<div class="wrap">
-  <div id="app"></div>
-</div>
+<div class="wrap"><div id="app"></div></div>
 <script>
-const DB_DS="ad9f760a-edb5-4b18-a1c2-7a0570f2996b";
-const PASS=14;
+// ── CONFIGURATION ────────────────────────────────────────────────────────────
+// Replace the value below with your Notion integration token.
+// See setup instructions at romaroni.github.io/assessment.html#setup
+const NOTION_TOKEN = "";
+const NOTION_DB_ID = "73e550e5c63c46c2940a88f43d605327";
+const PASS = 14;
+// ─────────────────────────────────────────────────────────────────────────────
+
 const Qs=[
-  {s:"Why Winnin Exists",sn:1,q:"According to Michael Goldhaber's theory of the Attention Economy, what is the truly scarce resource in the digital age?",opts:["Information — especially on the open web","Attention — which can only be earned, never bought","Money — since advertising costs keep rising","Data — which most brands don't know how to use"],c:1},
-  {s:"Why Winnin Exists",sn:1,q:"What percentage of total brand-related engagement on social platforms comes from organic, user-generated content?",opts:["Less than 30%","Approximately 50%","More than 70%","More than 90%"],c:2},
-  {s:"Why Winnin Exists",sn:1,q:"What is the Outside-In mindset?",opts:["Prioritizing external data sources over the brand's own data","Starting from what audiences care about in culture, then finding where the brand fits","Focusing exclusively on earned media over owned and paid","Building content strategies from social listening exports"],c:1},
-  {s:"Why Winnin Exists",sn:1,q:"What makes Winnin fundamentally different from social listening tools?",opts:["Winnin covers more platforms than any social listening tool","Winnin is behavioral — it measures what people actually do, not what they say","Winnin includes proprietary sentiment analysis unavailable elsewhere","Winnin focuses exclusively on video content from influencers"],c:1},
-  {s:"Why Winnin Exists",sn:1,q:"In the L'Oréal Brazil case, what insight took SkinCeuticals PTOCs from 36th to #1 in Share of Attention in a single quarter?",opts:["A major paid media investment across YouTube and Instagram","A celebrity influencer partnership timed to Christmas","Identifying that aesthetic procedures were the largest UGC skincare topic with zero brand investment","Launching a new product line targeting Gen Z consumers"],c:2},
-  {s:"How We Work",sn:2,q:"What is the primary reason Winnin is a platform business rather than a service business?",opts:["Winnin only sells annual software licenses","Revenue and headcount decouple — one system serves many clients without proportional cost increase","The team never participates in client calls or presentations","The platform fully replaces the need for human strategic analysis"],c:1},
-  {s:"How We Work",sn:2,q:"The Winnin Methodology always follows which core analytical principle?",opts:["Micro to macro — start specific and zoom out to the category","Brand-first — always begin by understanding the client's brand performance","Macro to micro — always start broad and funnel progressively to the specific insight","Category-first — always begin with category data before looking at any brand"],c:2},
-  {s:"How We Work",sn:2,q:"A client brief says: 'We want to target Gen Z on TikTok with our new skincare line.' What is the correct first step?",opts:["Build a TikTok dashboard and run a creator analysis immediately","Strip the executional layer and ask: what does this audience genuinely care about?","Check the client's current Share of Attention on TikTok first","Accept the brief as written and begin a TikTok performance analysis"],c:1},
-  {s:"How We Work",sn:2,q:"When should the default be to build a Dashboard rather than a Deck?",opts:["Only when the client explicitly requests a dashboard","Always — decks are never appropriate in a platform business","When the deliverable will be consulted more than once, clients need to explore data, or data will change","Only for strategic analyses that require deep data exploration"],c:2},
-  {s:"How We Work",sn:2,q:"What are the three pillars of the Winnin Health Score and their weights?",opts:["NPS (40%), Churn Risk (30%), Expansion Revenue (30%)","Product Adoption (30%), Journey (40%), Client Experience / Satisfaction (30%)","Platform Usage (50%), Recurrence (30%), Advocacy (20%)","Engagement (33%), Revenue (33%), Satisfaction (34%)"],c:1},
-  {s:"Meet Winnin Intelligence",sn:3,q:"Where do you find the Category page in Winnin Intelligence?",opts:["In a dedicated 'Category' tab in the top navigation sidebar","Under Brand tab → Overview","Inside the Culture tab","In Insights → Dashboards → Category view"],c:2},
-  {s:"Meet Winnin Intelligence",sn:3,q:"To create a Custom Topic (Owned Topic), you must navigate to:",opts:["Insights → Dashboards → Create New Topic","Culture → Videos, build a boolean query, then click Create Topic","Culture → Topics → My Topics → Create Custom","Home → ZAI → Generate Custom Topic"],c:1},
-  {s:"Meet Winnin Intelligence",sn:3,q:"What is E7 and why is it used to calculate the Relevance Index?",opts:["The top 7 most engaged videos — used to estimate territory relevance quickly","A 7-day rolling average of views — used to smooth out daily performance spikes","Engagement on the 7th day after publication — a fair comparison point before age-based bias accumulates","Engagement from the 7 most active creators — used as a proxy for cultural momentum"],c:2},
-  {s:"Meet Winnin Intelligence",sn:3,q:"What is the key difference between how the Brand tab and Share of Attention handle historical content?",opts:["The Brand tab covers more platforms than SoA","SoA counts cumulative engagement from all videos ever posted; the Brand tab only counts videos posted within the selected period","The Brand tab accounts for sentiment filtering; SoA does not","There is no meaningful difference — both show the same underlying data"],c:1},
-  {s:"Meet Winnin Intelligence",sn:3,q:"The Relationship metric in Winnin's Affinity section is best described as:",opts:["The percentage of audience overlap between two topics, as a universal percentage","A score quantifying audience connection strength — comparable only within the same analysis, not across analyses","The number of creators who produce content on both topics simultaneously","The revenue correlation between two brand territories in the same category"],c:1},
-  {s:"Meet Winnin Intelligence",sn:3,q:"Which platform is NOT included in Winnin's engagement calculation?",opts:["YouTube","Instagram","Twitch","TikTok"],c:2},
-  {s:"Meet Winnin Intelligence",sn:3,q:"Share of Attention filters for what type of content when calculating brand relevance?",opts:["Only organic UGC — owned and paid channels are excluded","Positive and neutral sentiment content only — negative content is excluded","Only content posted within the last 12 months","All content regardless of sentiment, weighted by engagement type"],c:1},
-  {s:"Meet Winnin Intelligence",sn:3,q:"ZAI operates in two main analytical contexts. What are they?",opts:["Paid analysis and organic analysis","Brand context (performance and competitive analysis) and Territory context (cultural categories and trends)","Historical analysis and real-time analysis","Strategic analysis and activation analysis"],c:1},
-  {s:"Meet Winnin Intelligence",sn:3,q:"The Tag Monitoring feature reduces standard data ingestion from 24–48 hours to approximately:",opts:["1 hour","4 hours","8 hours","12 hours"],c:1},
-  {s:"Meet Winnin Intelligence",sn:3,q:"Why does Winnin keep Music Topics in separate tabs within the Culture section?",opts:["Music content is licensed differently and requires special platform permissions","Music analysis requires a separate subscription tier","Music consumption generates views orders of magnitude larger than other content, distorting all comparisons","Music topics require a different machine learning model to classify correctly"],c:2}
+{s:"Why Winnin Exists",sn:1,q:"According to Michael Goldhaber's theory of the Attention Economy, what is the truly scarce resource in the digital age?",opts:["Information — especially on the open web","Attention — which can only be earned, never bought","Money — since advertising costs keep rising","Data — which most brands don't know how to use"],c:1},
+{s:"Why Winnin Exists",sn:1,q:"What percentage of total brand-related engagement on social platforms comes from organic, user-generated content?",opts:["Less than 30%","Approximately 50%","More than 70%","More than 90%"],c:2},
+{s:"Why Winnin Exists",sn:1,q:"What is the Outside-In mindset?",opts:["Prioritizing external data sources over the brand's own data","Starting from what audiences care about in culture, then finding where the brand fits","Focusing exclusively on earned media over owned and paid","Building content strategies from social listening exports"],c:1},
+{s:"Why Winnin Exists",sn:1,q:"What makes Winnin fundamentally different from social listening tools?",opts:["Winnin covers more platforms than any social listening tool","Winnin is behavioral — it measures what people actually do, not what they say","Winnin includes proprietary sentiment analysis unavailable elsewhere","Winnin focuses exclusively on video content from influencers"],c:1},
+{s:"Why Winnin Exists",sn:1,q:"In the L'Oréal Brazil case, what insight took SkinCeuticals PTOCs from 36th to #1 in Share of Attention in a single quarter?",opts:["A major paid media investment across YouTube and Instagram","A celebrity influencer partnership timed to Christmas","Identifying that aesthetic procedures were the largest UGC skincare topic with zero brand investment","Launching a new product line targeting Gen Z consumers"],c:2},
+{s:"How We Work",sn:2,q:"What is the primary reason Winnin is a platform business rather than a service business?",opts:["Winnin only sells annual software licenses","Revenue and headcount decouple — one system serves many clients without proportional cost increase","The team never participates in client calls or presentations","The platform fully replaces the need for human strategic analysis"],c:1},
+{s:"How We Work",sn:2,q:"The Winnin Methodology always follows which core analytical principle?",opts:["Micro to macro — start specific and zoom out to the category","Brand-first — always begin by understanding the client's brand performance","Macro to micro — always start broad and funnel progressively to the specific insight","Category-first — always begin with category data before looking at any brand"],c:2},
+{s:"How We Work",sn:2,q:"A client brief says: 'We want to target Gen Z on TikTok with our new skincare line.' What is the correct first step?",opts:["Build a TikTok dashboard and run a creator analysis immediately","Strip the executional layer and ask: what does this audience genuinely care about?","Check the client's current Share of Attention on TikTok first","Accept the brief as written and begin a TikTok performance analysis"],c:1},
+{s:"How We Work",sn:2,q:"When should the default be to build a Dashboard rather than a Deck?",opts:["Only when the client explicitly requests a dashboard","Always — decks are never appropriate in a platform business","When the deliverable will be consulted more than once, clients need to explore data, or data will change","Only for strategic analyses that require deep data exploration"],c:2},
+{s:"How We Work",sn:2,q:"What are the three pillars of the Winnin Health Score and their weights?",opts:["NPS (40%), Churn Risk (30%), Expansion Revenue (30%)","Product Adoption (30%), Journey (40%), Client Experience / Satisfaction (30%)","Platform Usage (50%), Recurrence (30%), Advocacy (20%)","Engagement (33%), Revenue (33%), Satisfaction (34%)"],c:1},
+{s:"Meet Winnin Intelligence",sn:3,q:"Where do you find the Category page in Winnin Intelligence?",opts:["In a dedicated 'Category' tab in the top navigation sidebar","Under Brand tab → Overview","Inside the Culture tab","In Insights → Dashboards → Category view"],c:2},
+{s:"Meet Winnin Intelligence",sn:3,q:"To create a Custom Topic (Owned Topic), you must navigate to:",opts:["Insights → Dashboards → Create New Topic","Culture → Videos, build a boolean query, then click Create Topic","Culture → Topics → My Topics → Create Custom","Home → ZAI → Generate Custom Topic"],c:1},
+{s:"Meet Winnin Intelligence",sn:3,q:"What is E7 and why is it used to calculate the Relevance Index?",opts:["The top 7 most engaged videos — used to estimate territory relevance quickly","A 7-day rolling average of views — used to smooth out daily performance spikes","Engagement on the 7th day after publication — a fair comparison point before age-based bias accumulates","Engagement from the 7 most active creators — used as a proxy for cultural momentum"],c:2},
+{s:"Meet Winnin Intelligence",sn:3,q:"What is the key difference between how the Brand tab and Share of Attention handle historical content?",opts:["The Brand tab covers more platforms than SoA","SoA counts cumulative engagement from all videos ever posted; the Brand tab only counts videos posted within the selected period","The Brand tab accounts for sentiment filtering; SoA does not","There is no meaningful difference — both show the same underlying data"],c:1},
+{s:"Meet Winnin Intelligence",sn:3,q:"The Relationship metric in Winnin's Affinity section is best described as:",opts:["The percentage of audience overlap between two topics, as a universal percentage","A score quantifying audience connection strength — comparable only within the same analysis, not across analyses","The number of creators who produce content on both topics simultaneously","The revenue correlation between two brand territories in the same category"],c:1},
+{s:"Meet Winnin Intelligence",sn:3,q:"Which platform is NOT included in Winnin's engagement calculation?",opts:["YouTube","Instagram","Twitch","TikTok"],c:2},
+{s:"Meet Winnin Intelligence",sn:3,q:"Share of Attention filters for what type of content when calculating brand relevance?",opts:["Only organic UGC — owned and paid channels are excluded","Positive and neutral sentiment content only — negative content is excluded","Only content posted within the last 12 months","All content regardless of sentiment, weighted by engagement type"],c:1},
+{s:"Meet Winnin Intelligence",sn:3,q:"ZAI operates in two main analytical contexts. What are they?",opts:["Paid analysis and organic analysis","Brand context (performance and competitive analysis) and Territory context (cultural categories and trends)","Historical analysis and real-time analysis","Strategic analysis and activation analysis"],c:1},
+{s:"Meet Winnin Intelligence",sn:3,q:"The Tag Monitoring feature reduces standard data ingestion from 24–48 hours to approximately:",opts:["1 hour","4 hours","8 hours","12 hours"],c:1},
+{s:"Meet Winnin Intelligence",sn:3,q:"Why does Winnin keep Music Topics in separate tabs within the Culture section?",opts:["Music content is licensed differently and requires special platform permissions","Music analysis requires a separate subscription tier","Music consumption generates views orders of magnitude larger than other content, distorting all comparisons","Music topics require a different machine learning model to classify correctly"],c:2}
 ];
 
 const sc={1:"s1",2:"s2",3:"s3"};
 let st={screen:"welcome",name:"",qi:0,ans:{},sel:null,res:null,reviewed:false,logging:false,logErr:null,logOk:false};
 
-function esc(s){return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;")}
+async function logResult(r){
+  st.logging=true;st.logErr=null;st.logOk=false;render();
+  const today=new Date().toISOString().split("T")[0];
+  try{
+    const resp=await fetch("https://api.notion.com/v1/pages",{
+      method:"POST",
+      headers:{
+        "Authorization":"Bearer "+NOTION_TOKEN,
+        "Notion-Version":"2022-06-28",
+        "Content-Type":"application/json"
+      },
+      body:JSON.stringify({
+        parent:{database_id:NOTION_DB_ID},
+        properties:{
+          "Full Name":{title:[{text:{content:st.name.trim()}}]},
+          "Date":{date:{start:today}},
+          "Score":{number:r.total},
+          "Percentage":{number:r.pct},
+          "Result":{select:{name:r.total>=PASS?"✅ Pass":"❌ Fail"}},
+          "Why Winnin Exists":{number:r.s1},
+          "How We Work":{number:r.s2},
+          "Meet Winnin Intelligence":{number:r.s3}
+        }
+      })
+    });
+    if(resp.ok){st.logOk=true;}
+    else{const b=await resp.json().catch(()=>({}));console.error("Notion:",b);st.logErr="Could not log result — please notify your manager.";}
+  }catch(e){console.error(e);st.logErr="Could not log result — please notify your manager.";}
+  st.logging=false;render();
+}
+
+function esc(s){return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");}
 
 function render(){
   const app=document.getElementById("app");
-  if(st.screen==="welcome") app.innerHTML=welcome();
-  else if(st.screen==="quiz") app.innerHTML=quiz();
+  if(st.screen==="welcome")app.innerHTML=welcome();
+  else if(st.screen==="quiz")app.innerHTML=quiz();
   else app.innerHTML=results();
   bind();
 }
 
 function welcome(){
   const ok=st.name.trim().length>=2;
-  return`<h1>Level 00: Foundations</h1>
-<p class="sub">Assessment</p>
+  return`<h1>Level 00: Foundations</h1><p class="sub">Assessment</p>
 <div class="card">
   <div class="metrics">
     <div class="metric"><div class="metric-label">Questions</div><div class="metric-val">20</div></div>
@@ -124,12 +152,8 @@ function quiz(){
   let opts="";
   q.opts.forEach((o,i)=>{
     let cls="opt";
-    if(st.reviewed){
-      if(i===q.c)cls+=" correct";
-      else if(i===st.sel&&i!==q.c)cls+=" wrong";
-    } else {
-      if(i===st.sel)cls+=" selected";
-    }
+    if(st.reviewed){if(i===q.c)cls+=" correct";else if(i===st.sel&&i!==q.c)cls+=" wrong";}
+    else{if(i===st.sel)cls+=" selected";}
     opts+=`<button class="${cls}" data-i="${i}">${String.fromCharCode(65+i)}. ${esc(o)}</button>`;
   });
   const showCheck=st.sel!==null&&!st.reviewed;
@@ -151,8 +175,7 @@ function quiz(){
 }
 
 function results(){
-  const r=st.res;
-  const passed=r.total>=PASS;
+  const r=st.res;const passed=r.total>=PASS;
   const date=new Date().toLocaleDateString("en-US",{year:"numeric",month:"long",day:"numeric"});
   const logHtml=st.logging?`<p class="log-status log-pending">Logging result to team database...</p>`
     :st.logErr?`<p class="log-status log-err">${esc(st.logErr)}</p>`
@@ -165,9 +188,7 @@ function results(){
     <div class="cert-course">Winnin Education — Level 00: Foundations</div>
     <div class="cert-score">Score: ${r.total}/20 (${r.pct}%)</div>
     <div class="cert-footer">
-      <span>${esc(date)}</span>
-      <span>Winnin Education</span>
-      <span>Rodrigo Maroni</span>
+      <span>${esc(date)}</span><span>Winnin Education</span><span>Rodrigo Maroni</span>
     </div>
   </div>`:"";
   const hint=!passed?`<p class="retake-hint">Review the summary pages at the end of each section and try again. You need ${PASS-r.total} more correct answer${PASS-r.total===1?"":"s"} to pass.</p>`:"";
@@ -181,32 +202,11 @@ function results(){
   <div class="metric"><div class="metric-label">How We Work</div><div class="metric-val">${r.s2}/5</div></div>
   <div class="metric"><div class="metric-label">Meet Winnin Intel.</div><div class="metric-val">${r.s3}/10</div></div>
 </div>
-${logHtml}
-${cert}
-${hint}
+${logHtml}${cert}${hint}
 <div style="display:flex;gap:8px;justify-content:center;margin-top:1.5rem">
   <button class="btn" id="retakeBtn">Retake assessment</button>
   ${passed?`<button class="btn" onclick="window.print()">Save certificate (print)</button>`:""}
 </div>`;
-}
-
-async function logResult(r){
-  st.logging=true;st.logErr=null;st.logOk=false;render();
-  const today=new Date().toISOString().split("T")[0];
-  try{
-    const resp=await fetch("https://api.anthropic.com/v1/messages",{
-      method:"POST",
-      headers:{"Content-Type":"application/json"},
-      body:JSON.stringify({
-        model:"claude-sonnet-4-20250514",
-        max_tokens:1000,
-        messages:[{role:"user",content:`Create a new page in the Notion database with data source ID ${DB_DS} with these exact values:\n- Full Name: "${st.name.trim()}"\n- date:Date:start: "${today}"\n- date:Date:is_datetime: 0\n- Score: ${r.total}\n- Percentage: ${r.pct}\n- Result: "${r.total>=PASS?"✅ Pass":"❌ Fail"}"\n- Why Winnin Exists: ${r.s1}\n- How We Work: ${r.s2}\n- Meet Winnin Intelligence: ${r.s3}\n\nCreate the page now using the notion tool.`}],
-        mcp_servers:[{type:"url",url:"https://mcp.notion.com/mcp",name:"notion-mcp"}]
-      })
-    });
-    if(resp.ok){st.logOk=true;}else{st.logErr="Could not log result — please notify your manager.";}
-  }catch(e){st.logErr="Could not log result — please notify your manager.";}
-  st.logging=false;render();
 }
 
 function bind(){
