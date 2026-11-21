@@ -17,7 +17,10 @@ const missions = [
 const worldLimit = 25;
 const cart = {x:-2.3,z:2.1,facing:0};
 const player = {x:0,z:0,walk:0};
-const camera = {x:0,z:0};
+const view = {x:-.34,z:-Math.sqrt(1-.34**2)};
+const camera = {x:0,z:0,height:2.45,follow:4.8};
+const nearClip = .32;
+const touchControls = matchMedia('(pointer:coarse), (max-width:720px)');
 const keys = new Set();
 let active = 0;
 let driving = false;
@@ -65,33 +68,61 @@ function block(x,z,w,d){blockers.push({x,z,w,d});}
 let seed = 810;
 function random(){seed = (Math.imul(1664525,seed)+1013904223)>>>0;return seed/4294967296;}
 
-let width, height, scale, originX, originY, ratio;
+let width, height, focal, originX, horizon, ratio;
+let sky;
 function resize(){
-  const box = canvas.getBoundingClientRect();
+  const bounds = canvas.getBoundingClientRect();
   ratio = Math.min(devicePixelRatio || 1,2);
-  width = box.width;
-  height = box.height;
+  width = bounds.width;
+  height = bounds.height;
   canvas.width = Math.round(width*ratio);
   canvas.height = Math.round(height*ratio);
-  scale = Math.max(19,Math.min(width/34,height/20,39));
-  originX = width*.49;
-  originY = height*.53;
+  const compact = touchControls.matches && height<535;
+  focal = Math.min(height*(compact?.69:.91),width*.92);
+  originX = width*.5;
+  horizon = height*(compact?.28:width<560?.43:.35);
+  ctx.setTransform(ratio,0,0,ratio,0,0);
+  sky = ctx.createLinearGradient(0,0,0,horizon+12);
+  sky.addColorStop(0,'#7c9ebf');
+  sky.addColorStop(.49,'#e2a6a3');
+  sky.addColorStop(.8,'#ffbb91');
+  sky.addColorStop(1,'#ffe0a4');
 }
 new ResizeObserver(resize).observe(canvas);
 resize();
-function project(x,z,y=0){
-  return [originX+(x-camera.x-z+camera.z)*scale*.866,originY+(x-camera.x+z-camera.z)*scale*.5-y*scale];
+function depth(x,z){
+  return (x-camera.x)*view.x+(z-camera.z)*view.z+camera.follow;
 }
-function poly(points,fill,stroke){
+function project(x,z,y,d){
+  const across = (x-camera.x)*-view.z+(z-camera.z)*view.x;
+  const zoom = focal/d;
+  return [originX+across*zoom,horizon+(camera.height-y)*zoom,zoom];
+}
+function poly(points,fill){
   ctx.beginPath();
-  points.forEach(([x,z,y],i) => {
-    const [sx,sy] = project(x,z,y);
-    if (i===0) ctx.moveTo(sx,sy); else ctx.lineTo(sx,sy);
-  });
+  let count=0;
+  let previous=points[points.length-1];
+  let previousDepth=depth(previous[0],previous[1]);
+  const vertex=(x,z,y,d)=>{
+    const [sx,sy]=project(x,z,y,d);
+    if(count++)ctx.lineTo(sx,sy);
+    else ctx.moveTo(sx,sy);
+  };
+  for(const point of points){
+    const [x,z,y]=point;
+    const d=depth(x,z);
+    if((d>=nearClip)!==(previousDepth>=nearClip)){
+      const t=(nearClip-previousDepth)/(d-previousDepth);
+      vertex(previous[0]+(x-previous[0])*t,previous[1]+(z-previous[1])*t,previous[2]+(y-previous[2])*t,nearClip);
+    }
+    if(d>=nearClip)vertex(x,z,y,d);
+    previous=point;
+    previousDepth=d;
+  }
+  if(count<3)return;
   ctx.closePath();
   ctx.fillStyle=fill;
   ctx.fill();
-  if(stroke){ctx.strokeStyle=stroke;ctx.lineWidth=.7;ctx.stroke();}
 }
 function plane(x,z,w,d,fill,y=0){
   poly([[x-w/2,z-d/2,y],[x+w/2,z-d/2,y],[x+w/2,z+d/2,y],[x-w/2,z+d/2,y]],fill);
@@ -103,7 +134,9 @@ function box(x,z,w,d,h,colors,y=0){
   plane(x,z,w,d,colors[0],t);
 }
 function ellipse(x,z,y,rx,ry,fill){
-  const [a,b]=project(x,z,y);
+  const d=depth(x,z);
+  if(d<nearClip)return;
+  const [a,b,scale]=project(x,z,y,d);
   ctx.beginPath();
   ctx.ellipse(a,b,rx*scale,ry*scale,0,0,Math.PI*2);
   ctx.fillStyle=fill;
@@ -227,6 +260,14 @@ for(const z of [6.1,7.1,8.1]){
     }
   });
 }
+for(let i=-4;i<=4;i++){
+  const x=i*5;
+  tree(x,-26,1.35,true);
+  object(x,-29,()=>{
+    box(x,-29,.15,.15,.85,['#fff1cf','#d6c2a4','#ad9074']);
+    box(x+2.4,-29,4.85,.11,.10,['#fff1cf','#d6c2a4','#ad9074'],.67);
+  });
+}
 for(const [x,z] of [[3.35,-3.4],[-3.45,-3.45],[-3.45,3.45],[3.45,3.45],[10,-3.4],[-10.5,3.4]]){
   object(x,z,() => {
     box(x,z,.19,.19,2.23,['#b9cacf','#617f8a','#526a7a']);
@@ -236,26 +277,67 @@ for(const [x,z] of [[3.35,-3.4],[-3.45,-3.45],[-3.45,3.45],[3.45,3.45],[10,-3.4]
 const grass = [];
 for(let i=0;i<510;i++){
   const x=random()*72-36,z=random()*72-36;
-  if(Math.abs(x)>3.5 && Math.abs(z)>3.5) grass.push([x,z,.08+random()*.19,i%5]);
+  if(z>-29 && Math.abs(x)>3.5 && Math.abs(z)>3.5) grass.push([x,z,.08+random()*.19,i%5]);
 }
+function drawSky(){
+  ctx.fillStyle=sky;
+  ctx.fillRect(0,0,width,height);
+  const sunX=width*.78,sunY=horizon*.69;
+  const sunRadius=Math.max(18,Math.min(width,height)*.044);
+  const glow=ctx.createRadialGradient(sunX,sunY,sunRadius*.4,sunX,sunY,sunRadius*3.6);
+  glow.addColorStop(0,'#fff0c6b0');
+  glow.addColorStop(1,'#ffe5af00');
+  ctx.fillStyle=glow;
+  ctx.fillRect(sunX-sunRadius*4,sunY-sunRadius*4,sunRadius*8,sunRadius*8);
+  ctx.beginPath();
+  ctx.arc(sunX,sunY,sunRadius,0,Math.PI*2);
+  ctx.fillStyle='#fff0c5';
+  ctx.fill();
+  for(const [position,elevation,w,h] of [[.15,.26,.14,4],[.27,.63,.18,5],[.66,.34,.16,4],[.86,.78,.17,3]]){
+    ctx.beginPath();
+    ctx.ellipse(width*position,horizon*elevation,Math.max(12,width*w),h,0,0,Math.PI*2);
+    ctx.fillStyle='#ffe0cd72';
+    ctx.fill();
+  }
+  for(let i=0;i<30;i++){
+    const x=width*((i*31)%109)/109;
+    const h=3+(i*17)%23;
+    ctx.fillStyle=i%3===0?'#b2868f':'#ba9296';
+    ctx.fillRect(x,horizon-h,Math.max(3,width*.008),h+4);
+  }
+}
+
 function ground(){
-  plane(0,0,140,140,'#89b978');
+  plane(0,-77,240,90,'#648b9c');
+  plane(0,-31.6,200,6.4,'#e8bc8d');
+  plane(0,36,200,131,'#879f66');
+  const bayColors=['#7da1a7','#a8b6ae','#d0b6a1'];
+  for(let i=0;i<26;i++){
+    const z=-35-(i%7)*3.3;
+    plane((i*13)%69-34,z,2.5+(i%4)*1.2,.11,bayColors[i%3]);
+  }
   for(let x=-36;x<36;x+=6) for(let z=-36;z<36;z+=6)
-    if((x+z)%12===0) plane(x+3,z+3,6,6,'#8ebd7c');
-  grass.forEach(([x,z,r,i])=>plane(x,z,r,r*.52,['#9ac684','#74ab70','#a4ca8d','#b2cf8c','#80b171'][i]));
+    if(z>=-30 && (x+z)%12===0) plane(x+3,z+3,6,6,'#8ebd7c');
+  grass.forEach(([x,z,r,i])=>depth(x,z)>.2 && plane(x,z,r,r*.52,['#9ac684','#74ab70','#a4ca8d','#b2cf8c','#80b171'][i]));
   for(const [x,z] of houses){
+    plane(x+.63,z+.7,5.35,4.3,'#50453b33');
     plane(x,z,5.55,4.2,'#9cca83');
     plane(x,z,4.9,3.85,'#80aa71');
     const end=z<0?-3.36:z+3.3;
     const start=z+1.65;
     if(Math.abs(z)<10) plane(x,(start+end)/2,1.13,Math.abs(end-start),'#e7daca');
   }
-  for(const [x,z,s] of trees) ellipse(x+.38,z+.07,0,s*.86,s*.34,'#4e79502e');
-  plane(0,0,6.8,110,'#eee2cd');plane(0,0,110,6.8,'#eee2cd');
-  plane(0,0,5.56,110,'#777f8d');plane(0,0,110,5.56,'#777f8d');
+  for(const [x,z,s] of trees) plane(x+.71,z+.78,s*1.3,s*1.8,'#413e3d2b');
+  const sidewalk='#dbc5aa', asphalt='#696b72';
+  plane(0,10,6.8,78,sidewalk);plane(0,0,110,6.8,sidewalk);
+  plane(0,10,5.56,78,asphalt);plane(0,0,110,5.56,asphalt);
+  for(const side of [-1,1]){
+    plane(side*2.69,10,.034,78,'#b7a995');
+    plane(0,side*2.69,110,.034,'#b7a995');
+  }
   for(let i=-43;i<=43;i+=2.2){
     if(Math.abs(i)>3.8){
-      plane(i,0,.98,.075,'#e9c67d');plane(0,i,.075,.98,'#e9c67d');
+      plane(i,0,.98,.075,'#e9c67d');if(i>-29)plane(0,i,.075,.98,'#e9c67d');
     }
   }
   for(let j=-2;j<=2;j++){
@@ -291,13 +373,17 @@ function drawPlayer(){
   box(x-.29,z+stride,.13,.16,.33,['#ffdbac','#edb485','#c68a67'],.36);
   box(x+.29,z-stride,.13,.16,.33,['#ffdbac','#edb485','#c68a67'],.36);
   box(x,z,.36,.32,.31,['#ffdfad','#f4be8b','#ce9472'],.72);
-  box(x-.057,z+.17,.045,.018,.045,['#253047','#253047','#253047'],.835);
-  box(x+.079,z+.17,.045,.018,.045,['#253047','#253047','#253047'],.835);
+  box(x,z+.15,.33,.10,.34,['#f5c572','#d69657','#b9764c'],.39);
+  box(x,z+.205,.25,.04,.13,['#ffdb91','#e9aa62','#ba7d4f'],.43);
+  box(x,z+.135,.33,.06,.16,['#6b473c','#6b473c','#50372f'],.81);
   box(x,z,.43,.37,.17,['#c99bec','#a978d5','#815cb1'],1.0);
-  box(x,z+.18,.37,.20,.045,['#bf91e7','#9f75ce','#8660b3'],.99);
+  box(x,z-.18,.37,.20,.045,['#bf91e7','#9f75ce','#8660b3'],.99);
 }
 function marker(x,z,color,symbol,t){
-  const [a,b]=project(x,z,1.61+Math.sin(t*.004)*.095);
+  const d=depth(x,z);
+  if(d<nearClip)return;
+  const [a,b]=project(x,z,1.47+Math.sin(t*.004)*.095,d);
+  if(a<15 || a>width-15 || b<12 || b>height-14)return;
   ctx.beginPath();
   ctx.moveTo(a,b+17);
   ctx.lineTo(a-6,b+8);
@@ -310,7 +396,7 @@ function marker(x,z,color,symbol,t){
   ctx.fillText(symbol,a,b+.5);
 }
 function minimap(){
-  const w=152,h=125,s=2.72;
+  const w=152,h=125,s=2.28;
   const dot=(x,z,r,color) => {
     map.beginPath();map.arc(w/2+x*s,h/2+z*s,r,0,Math.PI*2);map.fillStyle=color;map.fill();
   };
@@ -321,8 +407,16 @@ function minimap(){
     map.fillRect(w/2+(x-2.25)*s,h/2+(z-1.75)*s,4.5*s,3.5*s);
   });
   missions.forEach((m,i)=>dot(m.x,m.z,i===active?4:2.8,complete(i)?'#acc2b1':m.color));
+  if(!driving)dot(cart.x,cart.z,2.5,'#ffcc7d');
   dot(player.x,player.z,5,'#24354a');
   dot(player.x,player.z,3.2,'#fff5dd');
+  const edgeX=w/2+player.x*s,edgeZ=h/2+player.z*s;
+  map.beginPath();
+  map.moveTo(edgeX,edgeZ);
+  map.lineTo(edgeX+view.x*8,edgeZ+view.z*8);
+  map.strokeStyle='#fff5dd';
+  map.lineWidth=1.5;
+  map.stroke();
 }
 const distance = (a,b) => Math.hypot(a.x-b.x,a.z-b.z);
 function nearbyMission(){
@@ -358,14 +452,21 @@ function interact(){
 function updateObjective(time){
   const near=nearbyMission();
   const m=missions[active];
-  const touch=matchMedia('(pointer:coarse), (max-width:680px)').matches;
+  const touch=touchControls.matches;
   const action=touch?'Interact':'E';
   let label;
   if(driving) label='<b>Driving the neighborhood cart</b> · '+action+' to get out';
   else if(near>=0) label='<b>'+missions[near].name+'</b> · '+missions[near].steps[progress[near]]+' <b>['+action+']</b>';
   else if(time<messageUntil) label='<b>'+message+'</b>';
   else if(distance(player,cart)<1.65) label='<b>Neighborhood cart</b> · '+action+' to drive';
-  else if(m && !complete(active)) label='<b>'+m.name+'</b> · Head to '+m.place;
+  else if(m && !complete(active)){
+    const x=m.x-player.x,z=m.z-player.z;
+    const east=-view.z*x+view.x*z;
+    const forward=view.x*x+view.z*z;
+    const arrows=['↑','↗','→','↘','↓','↙','←','↖'];
+    const arrow=arrows[(Math.round(Math.atan2(east,forward)*4/Math.PI)+8)%8];
+    label='<b>'+arrow+' '+m.name+'</b> · '+m.place+' · '+Math.round(distance(player,m))+' m';
+  }
   else if(m) label='<b>'+m.name+' complete</b> · '+m.lesson;
   else label='<b>All chores complete!</b> · Enjoy exploring Sunset Bay.';
   if($('objective').innerHTML!==label) $('objective').innerHTML=label;
@@ -378,13 +479,15 @@ function move(dt){
   const dx=Number(keys.has('ArrowRight') || keys.has('d'))-Number(keys.has('ArrowLeft') || keys.has('a'));
   const dy=Number(keys.has('ArrowDown') || keys.has('s'))-Number(keys.has('ArrowUp') || keys.has('w'));
   if(!dx && !dy){player.walk=0;return;}
-  const length=Math.hypot(dx+dy,dy-dx);
+  const length=Math.hypot(dx,dy);
+  const horizontal=-view.z*dx-view.x*dy;
+  const vertical=view.x*dx-view.z*dy;
   const speed=driving?6.6:4.25;
-  const x=player.x+(dx+dy)/length*dt*speed,z=player.z+(dy-dx)/length*dt*speed;
+  const x=player.x+horizontal/length*dt*speed,z=player.z+vertical/length*dt*speed;
   if(passable(x,player.z)) player.x=x;
   if(passable(player.x,z)) player.z=z;
   player.walk+=dt*13;
-  if(driving) Object.assign(cart,{x:player.x,z:player.z,facing:Math.atan2(dy-dx,dx+dy)});
+  if(driving) Object.assign(cart,{x:player.x,z:player.z,facing:Math.atan2(vertical,horizontal)});
 }
 function togglePause(){
   if($('pauseMenu').open) $('pauseMenu').close();
@@ -422,14 +525,19 @@ function frame(now){
   const follow=1-Math.exp(-dt*5.5);
   camera.x+=(player.x-camera.x)*follow;
   camera.z+=(player.z-camera.z)*follow;
+  camera.follow+=((driving?3.85:4.8)-camera.follow)*follow;
+  camera.height+=((driving?1.95:2.45)-camera.height)*follow;
   ctx.setTransform(ratio,0,0,ratio,0,0);
+  drawSky();
   ground();
   const visible=[...scenery,{x:cart.x,z:cart.z,draw:drawCart}];
   if(!driving) visible.push({x:player.x,z:player.z,draw:drawPlayer});
-  visible.sort((a,b)=>a.x+a.z-b.x-b.z);
+  visible.sort((a,b)=>depth(b.x,b.z)-depth(a.x,a.z));
   for(const item of visible){
-    const [x,y]=project(item.x,item.z);
-    if(x>-scale*6 && x<width+scale*6 && y>-scale && y<height+scale*6)item.draw();
+    const d=depth(item.x,item.z);
+    if(d<=-3)continue;
+    const [x,y,zoom]=project(item.x,item.z,0,Math.max(nearClip,d));
+    if(x>-zoom*4 && x<width+zoom*4 && y<height+zoom*4)item.draw();
   }
   missions.forEach((m,i)=>{
     if(!complete(i))marker(m.x,m.z,i===active?'#9af4c7':m.color,m.icon,now);
