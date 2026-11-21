@@ -33,7 +33,7 @@ const exitDoor = {x:0,z:3.7};
 let area='street';
 const missionArea = mission => mission.area || 'street';
 const cart = {x:-2.3,z:2.1,facing:0};
-const player = {x:0,z:0,walk:0};
+const player = {x:0,z:0,walk:0,gait:0,sideways:0};
 const camera = {x:0,z:0,height:2.45,follow:4.8};
 const nearClip = .32;
 const touchControls = matchMedia('(pointer:coarse), (max-width:720px)');
@@ -183,6 +183,37 @@ loadArtwork('surfaces.webp?v=4',image=>{
 loadArtwork('walker.webp?v=4',image=>{artwork.walker=image;});
 loadArtwork('skyline.webp?v=4',image=>{artwork.skyline=image;});
 
+loadArtwork('stride.webp?v=5',image=>{artwork.stride=image;});
+function loadProps(path,names){
+  loadArtwork(path,image=>{
+    const w=image.width/2,h=image.height/2;
+    for(const [i,name] of names.entries()){
+      artwork[name]={image,x:(i%2)*w,y:Math.floor(i/2)*h,w,h};
+    }
+  });
+}
+loadProps('props.webp?v=5',['sofa','laundry','bookshelf','tree']);
+loadProps('furniture.webp?v=5',['kitchen','desk','palm','cart']);
+loadArtwork('facades.webp?v=5',image=>{artwork.facades=image;});
+
+function prop(name,x,z,w,h){
+  const sprite=artwork[name];
+  const d=depth(x,z);
+  if(!sprite || d<nearClip)return false;
+  const [px,py,zoom]=project(x,z,h,d);
+  ctx.drawImage(sprite.image,sprite.x,sprite.y,sprite.w,sprite.h,px-w*zoom/2,py,w*zoom,h*zoom);
+  return true;
+}
+function facade(i,x,z,w,h){
+  const image=artwork.facades;
+  const d=depth(x,z);
+  if(!image || d<nearClip)return false;
+  const [px,py,zoom]=project(x-w/2,z,h,d);
+  const size=image.width/2;
+  ctx.drawImage(image,(i%2)*size+2,Math.floor(i/2)*size+2,size-4,size-4,px,py,w*zoom,h*zoom);
+  return true;
+}
+
 function floorMaterial(name,x,z,w,d,repeat,opacity){
   const tile=materials[name];
   if(!tile)return;
@@ -231,10 +262,10 @@ function wallMaterial(x,z,w,h,opacity){
 }
 
 const palettes = [
-  ['#ffe3ba','#f9ba88','#d98f6b','#f48578','#c75860'],
-  ['#def3f5','#aadee7','#78b7c9','#5885ae','#405c87'],
-  ['#f5f6d0','#d8eab6','#a6c78d','#63a995','#438977'],
-  ['#fff1cf','#fce0a2','#d4a777','#bd92b3','#946f9e']
+  ['#ffe3ba','#f9ba88','#d98f6b','#a96856','#824d41'],
+  ['#def3f5','#aadee7','#78b7c9','#627788','#455965'],
+  ['#f5f6d0','#d8eab6','#a6c78d','#6b8773','#506453'],
+  ['#fff1cf','#fce0a2','#d4a777','#977f75','#725e57']
 ];
 const houses = [
   [5,-8,0],[-7,7,1],[-8,-8,2],[11,-9,3],[-13,-8,0],[-13,8,3],
@@ -247,11 +278,13 @@ function house(x,z,palette){
   object(x,z,() => {
     const h=2.75;
     box(x,z,4.5,3.5,h,[top,front,side]);
-    wallMaterial(x,z+1.751,4.5,h,.36);
+    const textured=facade(palette,x,z+1.753,4.5,h);
+    if(!textured)wallMaterial(x,z+1.751,4.5,h,.36);
     box(x,z+1.765,4.52,.04,.18,[side,side,side],.04);
     box(x,z+1.77,4.55,.14,.09,['#aaa093','#8a7c72','#746a61'],2.65);
     for(const dx of [-2.12,2.12])box(x+dx,z+1.77,.056,.068,2.62,[top,top,side]);
     box(x,z+1.89,1.43,.48,.2,['#e9e5d6','#bfb7a7','#aaa599']);
+    if(!textured){
     box(x,z+1.76,.76,.055,1.45,['#fff2df','#f7f0dc','#d9cfb7'],.19);
     box(x,z+1.8,.6,.055,1.29,['#597887','#4d677c','#3a5669'],.21);
     box(x+.19,z+1.84,.065,.035,.07,['#fff0b0','#ffd884','#e2ad5c'],.74);
@@ -262,6 +295,7 @@ function house(x,z,palette){
       box(x+dx,z+1.84,.71,.025,.065,['#f5f5df','#f5f5df','#d5c7ad'],1.48);
       box(x+dx,z+1.89,.86,.22,.12,['#aade83','#a96d55','#8e594c'],1.02);
       for(let j=0;j<4;j++) ellipse(x+dx-.3+j*.2,z+1.91,1.17,.085,.06,j%2?'#ffb1ad':'#ffdd78');
+    }
     }
     for(const dz of [-.85,.75]){
       box(x+2.26,z+dz,.065,.82,.83,['#fffbdf','#fffae9','#e8dcc4'],1.11);
@@ -288,6 +322,7 @@ houses.forEach(args => house(...args));
 function tree(x,z,s,palm=false){
   object(x,z,() => {
     if(palm){
+      if(prop('palm',x,z,2.3*s,3.4*s))return;
       box(x,z,.17*s,.17*s,2.7*s,['#cba274','#ac805c','#896751']);
       for(let j=0;j<8;j++){
         const angle=j*Math.PI/4;
@@ -303,6 +338,7 @@ function tree(x,z,s,palm=false){
       }
       return;
     }
+    if(prop('tree',x,z,2.65*s,3.12*s))return;
     box(x,z,.25*s,.25*s,1.66*s,['#cba274','#a67a55','#8f634b']);
     const shades = [
       ['#9ba467','#617849','#3a5536'],
@@ -547,6 +583,7 @@ function furniture(zone,x,z,w,d,draw){
   block(x,z,w,d,zone);
 }
 furniture('apartment',0,-7.22,5.3,1.03,()=>{
+  if(!prop('kitchen',0,-6.69,5.3,1.39)){
   box(0,-7.22,5.3,1.02,.91,['#c79266','#b87f57','#91674e']);
   for(let x=-2;x<=2;x++){
     box(x,-6.689,.93,.048,.73,shade,.08);
@@ -561,11 +598,13 @@ furniture('apartment',0,-7.22,5.3,1.03,()=>{
   box(.45,-7.47,.138,.13,.24,['#aed1bd','#70a494','#57776a'],1.04);
   box(.47,-7.46,.17,.08,.048,metal,1.27);
   box(1.78,-7.18,.64,.34,.08,wood,1.045);
+  }
   if(!complete(4)){
     for(let i=0;i<3;i++)ellipse(.69+i*.17,-7.12,1.04+i*.034,.15,.031,progress[4]?'#f5ece1':'#bcd9d3');
   }
 });
 furniture('apartment',-4.25,-5.74,2,1.15,()=>{
+  if(!prop('laundry',-4.25,-5.26,2.08,1.59)){
   for(const x of [-4.79,-3.72]){
     box(x,-5.74,.99,1.05,1.15,metal);
     ellipse(x,-5.201,.58,.34,.34,'#7e98a3');
@@ -573,12 +612,14 @@ furniture('apartment',-4.25,-5.74,2,1.15,()=>{
     ellipse(x-.052,-5.167,.64,.12,.08,'#647f8c');
     box(x,-5.188,.58,.05,.12,['#edf1e8','#eaf0eb','#b7c7c7'],.95);
   }
+  }
   for(let i=0;i<3 && !complete(1);i++){
     const color=['#d08fa0','#97b8c9','#f0c58e'][i];
     box(-4.52+i*.22,-5.7,.24,progress[1]?.36:.54,.07,[color,color,'#c78691'],1.17);
   }
 });
 furniture('apartment',4.85,-4.14,2.85,1.65,()=>{
+  if(prop('sofa',4.85,-3.48,2.86,1.34))return;
   const upholstery=['#e29392','#b9737a','#975969'];
   box(4.85,-4.14,2.85,1.62,.43,upholstery);
   box(4.85,-4.72,2.84,.41,.86,upholstery,.42);
@@ -598,8 +639,10 @@ object(3.22,-3.03,()=>{
 },'apartment');
 for(const z of [-4.7,-2.9])for(const x of [-4.4,-1.9]){
   furniture('school',x,z,1.36,.86,()=>{
-    for(const dx of [-.55,.55])for(const dz of [-.28,.28])box(x+dx,z+dz,.075,.075,.71,metal);
-    box(x,z,1.36,.86,.095,wood,.69);
+    if(!prop('desk',x,z+.30,1.36,.8)){
+      for(const dx of [-.55,.55])for(const dz of [-.28,.28])box(x+dx,z+dz,.075,.075,.71,metal);
+      box(x,z,1.36,.86,.095,wood,.69);
+    }
     if(!complete(5)){
       box(x-.24,z-.17,.44,.32,.06,['#edf0cf','#d6d7b3','#b3b299'],.79);
       box(x+.23,z+.07,.08,.32,.055,['#ffcd77','#dfac64','#ae815c'],.79);
@@ -607,6 +650,7 @@ for(const z of [-4.7,-2.9])for(const x of [-4.4,-1.9]){
   });
 }
 furniture('school',3.95,-6.9,4.1,.65,()=>{
+  if(prop('bookshelf',3.95,-6.60,4.1,2.27))return;
   box(3.95,-7.12,4.1,.16,2.25,wood);
   for(const y of [.15,.73,1.31,1.9]){
     box(3.95,-6.9,4.19,.65,.085,wood,y);
@@ -638,6 +682,7 @@ function drawCart(){
   const across = Math.abs(Math.sin(facing))>Math.abs(Math.cos(facing));
   const w=across?.83:1.35,d=across?1.35:.83;
   ellipse(x,z,0,.73,.28,'#263d4655');
+  if(prop('cart',x,z,.94,.99))return;
   for(const a of [-1,1]) for(const b of [-1,1])
     box(x+a*w*.42,z+b*d*.46,.22,.21,.24,['#4f5963','#313c49','#253343']);
   box(x,z,w,d,.38,['#ffd176','#e7a049','#c67747'],.14);
@@ -654,6 +699,48 @@ function shadedOval(x,z,y,rx,ry,colors){
   gradient.addColorStop(1,colors[2]);
   ellipse(x,z,y,rx,ry,gradient);
 }
+// Joint coordinates are in pixels in the original 179 × 560 rear-view sprite.
+const limbJoints = [
+  [[29,131],[20,232],[20,321]],
+  [[149,131],[157,232],[158,321]],
+  [[59,289],[51,407],[44,541]],
+  [[119,289],[127,407],[134,541]]
+];
+function drawStridePiece(index){
+  const w=artwork.walker.width,h=artwork.walker.height;
+  ctx.drawImage(artwork.stride,(index%3)*w,Math.floor(index/3)*h,w,h,0,0,w,h);
+}
+function drawLimbSegment(index,from,to,start,end){
+  const dx=to[0]-from[0],dy=to[1]-from[1];
+  const tx=end[0]-start[0],ty=end[1]-start[1];
+  const stretch=Math.hypot(tx,ty)/Math.hypot(dx,dy);
+  ctx.save();
+  ctx.translate(...start);
+  ctx.rotate(Math.atan2(ty,tx));
+  ctx.scale(stretch,1);
+  ctx.rotate(-Math.atan2(dy,dx));
+  ctx.translate(-from[0],-from[1]);
+  drawStridePiece(index);
+  ctx.restore();
+}
+function drawWalkCycle(phase,gait,sideways){
+  const stride=Math.sin(phase);
+  const lift=Math.cos(phase);
+  for(let i=0;i<limbJoints.length;i++){
+    const [root,joint,tip]=limbJoints[i];
+    const side=i%2===0?-1:1;
+    const arm=i<2;
+    const swing=stride*side*gait*(arm?-1:1);
+    const raised=arm?Math.abs(swing)*14:Math.max(0,lift*side)*43*gait;
+    const reach=sideways*stride*gait*(arm?-.7:1);
+    const middle=[joint[0]+swing*6+reach*10,joint[1]-raised*.42+swing*(arm?8:5)];
+    const end=[tip[0]+swing*(arm?19:12)+reach*23,tip[1]-raised+swing*(arm?14:5)];
+    drawLimbSegment(i*2+1,joint,tip,middle,end);
+    drawLimbSegment(i*2,root,joint,root,middle);
+  }
+  drawStridePiece(8);
+}
+
 function drawPlayer(){
   const {x,z,walk}=player;
   const stride=Math.sin(walk)*.11;
@@ -666,13 +753,16 @@ function drawPlayer(){
   if(artwork.walker){
     const d=depth(x,z);
     const [px,py,zoom]=project(x,z,0,d);
-    const motion=Math.sin(walk);
-    const h=(1.32+Math.abs(motion)*.015)*zoom;
-    const w=h*artwork.walker.width/artwork.walker.height;
+    const motion=Math.sin(walk)*player.gait;
+    const w=artwork.walker.width,h=artwork.walker.height;
+    const size=1.40*zoom/h;
     ctx.save();
-    ctx.translate(px+motion*zoom*.019,py);
-    ctx.rotate(motion*.035);
-    ctx.drawImage(artwork.walker,-w/2,-h,w,h);
+    ctx.translate(px+motion*zoom*.021,py-Math.abs(motion)*zoom*.013);
+    ctx.rotate(motion*.025);
+    ctx.scale(size,size);
+    ctx.translate(-w/2,-h);
+    if(artwork.stride && player.gait>.025)drawWalkCycle(walk,player.gait,player.sideways);
+    else ctx.drawImage(artwork.walker,0,0);
     ctx.restore();
     return;
   }
@@ -765,7 +855,7 @@ function enterArea(next, viaDoor=false){
   driving=false;
   keys.clear();
   messageUntil=0;
-  Object.assign(player,next==='street' && viaDoor ? doors[from] : areas[next].spawn,{walk:0});
+  Object.assign(player,next==='street' && viaDoor ? doors[from] : areas[next].spawn,{walk:0,gait:0,sideways:0});
   Object.assign(camera,{x:player.x,z:player.z});
   resize();
   const selected=missions[active];
@@ -846,13 +936,21 @@ function passable(x,z){
 function move(dt){
   const dx=Number(keys.has('ArrowRight') || keys.has('d'))-Number(keys.has('ArrowLeft') || keys.has('a'));
   const dy=Number(keys.has('ArrowDown') || keys.has('s'))-Number(keys.has('ArrowUp') || keys.has('w'));
-  if(!dx && !dy){player.walk=0;return;}
+  if(!dx && !dy){
+    player.gait=Math.max(0,player.gait-dt*8);
+    if(player.gait===0)player.walk=0;
+    return;
+  }
+  const beforeX=player.x,beforeZ=player.z;
   const length=Math.hypot(dx,dy);
   const speed=driving?6.6:area==='street'?4.25:3.25;
   const x=player.x+dx/length*dt*speed,z=player.z+dy/length*dt*speed;
   if(passable(x,player.z)) player.x=x;
   if(passable(player.x,z)) player.z=z;
-  player.walk+=dt*13;
+  const moved=Math.hypot(player.x-beforeX,player.z-beforeZ);
+  player.walk+=moved*3.7;
+  player.gait=Math.max(0,Math.min(1,player.gait+(moved>0?dt*10:-dt*8)));
+  player.sideways+=(dx/length-player.sideways)*Math.min(1,dt*12);
   if(driving) Object.assign(cart,{x:player.x,z:player.z,facing:Math.atan2(dy,dx)});
 }
 function togglePause(){
