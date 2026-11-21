@@ -16,3 +16,4 @@
 
 @media(721px <= width <= 1200px){.area-switch{top:93px;left:20px;transform:none}}
 .direction{display:inline-block;font:800 15px Arial,sans-serif;transform:rotate(var(--turn));margin-right:3px}
+.pause::before{content:"";display:inline-block;width:11px;height:13px;border-inline:3px solid currentColor;box-sizing:border-box;vertical-align:middle}
