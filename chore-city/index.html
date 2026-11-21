@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Chore City · Sunset Bay</title>
-<link rel="stylesheet" href="style.css?v=2">
+<link rel="stylesheet" href="style.css?v=3">
 </head>
 <body>
 <header class="topbar">
@@ -15,14 +15,15 @@
 <main class="layout">
   <aside class="sidebar" aria-label="Mission tracker">
     <div class="intro"><div class="eyebrow"><span></span> YOUR NEIGHBORHOOD</div><h1>Small chores.<br><em>Big impact.</em></h1><p>Explore Sunset Bay and lend a hand around the neighborhood.</p></div>
-    <div class="section-heading"><h2>Mission board</h2><span id="count">0 / 4</span></div>
+    <div class="section-heading"><h2>Mission board</h2><span id="count">0 / 7</span></div>
     <div id="missions" class="missions"></div>
     <div class="score"><span class="coin">★</span><div><small>CHORE POINTS</small><strong id="points">0</strong></div></div>
   </aside>
   <section class="play" aria-label="Sunset Bay game">
     <canvas id="world" aria-label="Third-person view of the neighborhood"></canvas>
-    <div class="world-label"><span>☀</span><div><b>Sunset Bay</b><small>FREE ROAM</small></div></div>
-    <div class="map"><canvas id="map" width="152" height="125" aria-label="Neighborhood map"></canvas><span>N ↑</span></div>
+    <div class="world-label"><span>☀</span><div><b id="areaName">Sunset Bay</b><small>FREE ROAM</small></div></div>
+    <div class="map"><canvas id="map" width="152" height="125" aria-label="Neighborhood map"></canvas><span id="areaMapLabel">N ↑</span></div>
+    <nav class="area-switch" aria-label="Game environments"><button data-area="street" aria-pressed="true">Street</button><button data-area="apartment" aria-pressed="false">Apartment</button><button data-area="school" aria-pressed="false">School</button></nav>
     <div id="objective" class="objective" aria-live="polite"></div>
     <button id="touchInteract" class="touch-interact">Interact</button>
     <div class="touch-move" aria-label="Movement controls"><button data-move="ArrowUp" aria-label="Move up">↑</button><div><button data-move="ArrowLeft" aria-label="Move left">←</button><button data-move="ArrowDown" aria-label="Move down">↓</button><button data-move="ArrowRight" aria-label="Move right">→</button></div></div>
@@ -30,6 +31,6 @@
     <dialog id="pauseMenu"><h2>Game paused</h2><p>Take your time. Sunset Bay will be here.</p><button id="resume">Resume game</button></dialog>
   </section>
 </main>
-<script src="game.js?v=2"></script>
+<script src="game.js?v=3"></script>
 </body>
 </html>
